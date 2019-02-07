@@ -4,7 +4,7 @@
 
 (progn
   (core:dlopen #+darwin "/usr/local/lib/libopenvr_api.dylib"
-               #+linux "/usr/local/lib/libopenvr.so")) ;; Clasp Common Lisp not supported on Windows
+               #+linux "/usr/local/lib/libopenvr_api.so")) ;; Clasp Common Lisp not supported on Windows
 
 
 ;;;
