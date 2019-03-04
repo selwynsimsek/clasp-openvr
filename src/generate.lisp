@@ -28,11 +28,12 @@
 (defvar *structs* (cdr (fourth *api-json*)))
 (defvar *methods* (cdr (fifth *api-json*)))
 (defvar *classes* (remove-duplicates (mapcar #'cdar *methods*) :test #'string=))
-(defvar *includes* '("<clasp/core/foundation.h>" "<clasp/core/common.h>" "<clasp/clasp.h>" "<clasp/clbind/clbind.h>"
+(defvar *includes* '("<vulkan/vulkan.h>" "<vulkan/vulkan_core.h>"
+                     "<clasp/core/foundation.h>" "<clasp/core/common.h>" "<clasp/clasp.h>" "<clasp/clbind/clbind.h>"
                      "<clasp/clbind/details.h>" "<clasp/clbind/function.h>"
                      "<clasp/core/numbers.h>" "<clasp/core/debugger.h>" "<clasp/core/array.h>"
                      "<clasp/core/package.h>" "<clasp/core/translators.h>" "<clasp/core/cons.h>" "\"openvr.h\""
-                     "<vulkan/vulkan.h>"))
+                     ))
 
 (defun emit-includes ()
   (format t "~{#include ~a~%~}~%" *includes*))
@@ -88,8 +89,8 @@
   )
 (defun emit-methods ()
   (format t "package(\"CLASP-OPENVR\") [ ~%")
-  (format t "def(\"VR_Init\",&vr::VR_Shutdown,policies<>(),\"()\"),~%")
-  (format t "def(\"VR_Shutdown\",&vr::VR_Init,policies<>(),\"(peError eApplicationType)\"),~%")
+  (format t "def(\"VR_Init\",&vr::VR_Init,policies<>(),\"(peError eApplicationType)\"),~%")
+  (format t "def(\"VR_Shutdown\",&vr::VR_Shutdown,policies<>(),\"()\"),~%")
   (loop for class in *classes* do
         (progn (emit-class class)
                (unless (string= class (car (last *classes*))) (format t ","))))
@@ -102,7 +103,7 @@
                                      :if-does-not-exist :create)
     (format t *clbind-start-message*)
     (emit-includes)
-    (format t "void startup()~%{using namespace clbind;~%")
+    (format t "void startup(){~%using namespace clbind;~%")
     (emit-typedefs)
     (emit-enums)
     (emit-structs)
