@@ -45,7 +45,7 @@
   (let ((methods (class-methods class)))
     (format t "class_<~a>(\"~a\",no_default_constructor)~%" class class)
     (loop for ( (nil . nil) ( nil . methodname ) (nil . return-type) (nil . params)) in methods do
-          (let ((param-string (apply #'concatenate 'string (butlast (loop for ((nil . param-name) (nil . param-type)) in (cdr params)
+          (let ((param-string (apply #'concatenate 'string (butlast (loop for ((nil . param-name) (nil . param-type)) in params
                                                                           collect param-name
                                                                           collect " ")))))
             (format t ".def(\"~a\",&~a::~a,policies<>(),\"(self ~a)\")~%" methodname class methodname param-string)))))
