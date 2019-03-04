@@ -27,10 +27,27 @@
 (defvar *consts* (cdr (third *api-json*)))
 (defvar *structs* (cdr (fourth *api-json*)))
 (defvar *methods* (cdr (fifth *api-json*)))
-(defvar *includes* '("<clasp/clasp.h>" "<clasp/clbind/clbind.h>"))
+(defvar *classes* (remove-duplicates (mapcar #'cdar *methods*) :test #'string=))
+(defvar *includes* '("<clasp/core/foundation.h>" "<clasp/core/common.h>" "<clasp/clasp.h>" "<clasp/clbind/clbind.h>"
+                     "<clasp/clbind/details.h>" "<clasp/clbind/function.h>"
+                     "<clasp/core/numbers.h>" "<clasp/core/debugger.h>" "<clasp/core/array.h>"
+                     "<clasp/core/package.h>" "<clasp/core/translators.h>" "<clasp/core/cons.h>" "\"openvr.h\""
+                     "<vulkan/vulkan.h>"))
 
 (defun emit-includes ()
   (format t "~{#include ~a~%~}~%" *includes*))
+
+(defun class-methods (class)
+  (remove-if-not (lambda (classname) (string= classname class)) *methods* :key #'cdar))
+
+(defun emit-class (class)
+  (let ((methods (class-methods class)))
+    (format t "class_<~a>(\"~a\",no_default_constructor)~%" class class)
+    (loop for ( (nil . nil) ( nil . methodname ) (nil . return-type) (nil . params)) in methods do
+          (let ((param-string (apply #'concatenate 'string (butlast (loop for ((nil . param-name) (nil . param-type)) in (cdr params)
+                                                                          collect param-name
+                                                                          collect " ")))))
+            (format t ".def(\"~a\",&~a::~a,policies<>(),\"(self ~a)\")~%" methodname class methodname param-string)))))
 
 (defmacro namespace (namespace &rest body)
   `(progn (format t "namespace ~a { ~%" ,namespace)
@@ -67,11 +84,16 @@
                                         (convert-type (cdaddr const)))) *consts* )))
 
 (defun emit-structs ()
-                                        ;code here
+  ; 
   )
 (defun emit-methods ()
-                                        ;code here
-  )
+  (format t "package(\"CLASP-OPENVR\") [ ~%")
+  (format t "def(\"VR_Init\",&vr::VR_Shutdown,policies<>(),\"()\"),~%")
+  (format t "def(\"VR_Shutdown\",&vr::VR_Init,policies<>(),\"(peError eApplicationType)\"),~%")
+  (loop for class in *classes* do
+        (progn (emit-class class)
+               (unless (string= class (car (last *classes*))) (format t ","))))
+  (format t "]; ~%"))
 
 (defun write-clbind-file ()
   (with-open-file (*standard-output* *clbind-file-output*
@@ -80,10 +102,13 @@
                                      :if-does-not-exist :create)
     (format t *clbind-start-message*)
     (emit-includes)
+    (format t "void startup()~%{using namespace clbind;~%")
     (emit-typedefs)
     (emit-enums)
     (emit-structs)
     (emit-methods)
+    (format t "};~%")
+    (format t "~%~%~%CLASP_REGISTER_STARTUP(startup)~%~%")
     (format t *clbind-end-message*))
   (with-open-file (*standard-output* *lisp-file-output*
                                      :direction :output
