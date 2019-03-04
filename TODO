@@ -1,0 +1,3 @@
+Make it work!
+Add tests?
+Package everything together into a system - (asdf:load-system :clasp-openvr) should regenerate and recompile the bindings if necessary and load them into Clasp.
