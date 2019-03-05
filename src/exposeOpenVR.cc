@@ -369,7 +369,7 @@ class_<vr::IVRSystem>("vr::IVRSystem",no_default_constructor)
 
 
 
-CLASP_REGISTER_STARTUP(startup)
+CLASP_REGISTER_STARTUP(startup);
 
 
 

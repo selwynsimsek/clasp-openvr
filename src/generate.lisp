@@ -109,7 +109,7 @@
     (emit-structs)
     (emit-methods)
     (format t "};~%")
-    (format t "~%~%~%CLASP_REGISTER_STARTUP(startup)~%~%")
+    (format t "~%~%~%CLASP_REGISTER_STARTUP(startup);~%~%")
     (format t *clbind-end-message*))
   (with-open-file (*standard-output* *lisp-file-output*
                                      :direction :output
