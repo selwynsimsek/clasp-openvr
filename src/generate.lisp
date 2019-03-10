@@ -91,7 +91,7 @@
   (format t "package(\"CLASP-OPENVR\") [ ~%")
   (format t "def(\"VR_Init\",&vr::VR_Init,policies<>(),\"(peError eApplicationType)\"),~%")
   (format t "def(\"VR_Shutdown\",&vr::VR_Shutdown,policies<>(),\"()\"),~%")
-  (loop for class in *classes* do
+  (loop for class in (last *classes*) do
         (progn (emit-class class)
                (unless (string= class (car (last *classes*))) (format t ","))))
   (format t "]; ~%"))
